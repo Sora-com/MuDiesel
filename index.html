@@ -191,7 +191,7 @@ select.pill{appearance:none;padding-right:28px;
 
 <div class="header">
   <h1>
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16"/><path d="M13 10h4a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-4"/><path d="M7 2v4"/><path d="M10 2v4"/><path d="M3 22h10"/></svg>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="13" height="20" rx="2"/><path d="M15 6h2a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><path d="M19 10h1.5a1.5 1.5 0 0 1 0 3H19"/><line x1="6" y1="18" x2="12" y2="18"/><path d="M8.5 2v3"/><circle cx="8.5" cy="10" r="3"/></svg>
     Mu<span>Diesel</span>
   </h1>
   <p>Gasolineras baratas cerca de ti</p>
@@ -229,7 +229,7 @@ select.pill{appearance:none;padding-right:28px;
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
     Buy me a coffee
   </a>
-  <p>Datos del <a href="https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/" target="_blank">Ministerio de Industria y Turismo</a> · Precios actualizados diariamente</p>
+  <p>Datos del <a href="https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/" target="_blank">Ministerio de Industria y Turismo</a> · Precios actualizados en tiempo real cada 5 min</p>
 </div>
 
 <script>
@@ -380,7 +380,8 @@ select.pill{appearance:none;padding-right:28px;
       'Precio Gasolina 95 E5': 'Gasolina 95',
       'Precio Gasolina 98 E5': 'Gasolina 98'
     };
-    statusText.textContent = `${stations.length} gasolineras con ${fuelNames[selectedFuel]} en ${selectedRadius} km`;
+    const timeStr = lastUpdate ? ` · ${formatTime(lastUpdate)}` : '';
+    statusText.textContent = `${stations.length} gasolineras con ${fuelNames[selectedFuel]} en ${selectedRadius} km${timeStr}`;
 
     if (stations.length === 0) {
       content.innerHTML = `<div class="empty">
@@ -465,6 +466,23 @@ select.pill{appearance:none;padding-right:28px;
     });
   }
 
+  // Auto-refresh interval (5 min)
+  const REFRESH_INTERVAL = 5 * 60 * 1000;
+  let refreshTimer = null;
+  let lastUpdate = null;
+
+  async function refreshData() {
+    try {
+      allStations = await fetchStations();
+      lastUpdate = new Date();
+      render();
+    } catch (e) { /* silent fail on refresh, keep old data */ }
+  }
+
+  function formatTime(date) {
+    return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  }
+
   // Init
   async function init() {
     try {
@@ -473,6 +491,7 @@ select.pill{appearance:none;padding-right:28px;
       userLon = pos.lon;
 
       allStations = await fetchStations();
+      lastUpdate = new Date();
 
       controls.style.display = '';
       statusBar.style.display = '';
@@ -480,6 +499,16 @@ select.pill{appearance:none;padding-right:28px;
 
       setupControls();
       render();
+
+      // Auto-refresh every 5 min
+      refreshTimer = setInterval(refreshData, REFRESH_INTERVAL);
+
+      // Refresh on tab focus
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && lastUpdate && (Date.now() - lastUpdate.getTime() > REFRESH_INTERVAL)) {
+          refreshData();
+        }
+      });
     } catch (err) {
       showError('Error', err.message);
     }
