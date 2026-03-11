@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0f0f0f">
+<meta name="description" content="Encuentra las gasolineras más baratas cerca de ti en España">
+<title>MuDiesel - Gasolineras baratas cerca de ti</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f0f0f;
+  --surface:#1a1a1a;
+  --surface2:#242424;
+  --border:#2a2a2a;
+  --text:#e8e8e8;
+  --text2:#888;
+  --accent:#4ade80;
+  --accent2:#22c55e;
+  --warn:#facc15;
+  --danger:#f87171;
+  --radius:14px;
+  --shadow:0 2px 12px rgba(0,0,0,.4);
+}
+html{font-size:16px}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  background:var(--bg);color:var(--text);
+  min-height:100dvh;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit;text-decoration:none}
+
+/* Header */
+.header{
+  position:sticky;top:0;z-index:100;
+  background:rgba(15,15,15,.85);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  padding:16px 20px 12px;
+}
+.header h1{
+  font-size:1.4rem;font-weight:700;letter-spacing:-.02em;
+  display:flex;align-items:center;gap:8px;
+}
+.header h1 span{color:var(--accent)}
+.header p{font-size:.8rem;color:var(--text2);margin-top:2px}
+
+/* Controls */
+.controls{
+  padding:12px 20px;
+  display:flex;flex-direction:column;gap:10px;
+}
+.control-row{display:flex;gap:8px;flex-wrap:wrap}
+.pill{
+  padding:8px 16px;border-radius:100px;
+  background:var(--surface2);border:1px solid var(--border);
+  color:var(--text2);font-size:.82rem;font-weight:500;
+  cursor:pointer;transition:all .2s;
+  white-space:nowrap;
+}
+.pill.active{background:var(--accent);color:#0f0f0f;border-color:var(--accent)}
+.pill:hover{border-color:var(--accent)}
+select.pill{appearance:none;padding-right:28px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23888' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;
+}
+
+/* Status bar */
+.status{
+  padding:8px 20px;font-size:.78rem;color:var(--text2);
+  display:flex;align-items:center;gap:6px;
+}
+.status .dot{
+  width:6px;height:6px;border-radius:50%;background:var(--accent);
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* Loading */
+.loading-screen{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:80px 20px;gap:16px;
+}
+.spinner{
+  width:36px;height:36px;border:3px solid var(--border);
+  border-top-color:var(--accent);border-radius:50%;
+  animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-screen p{color:var(--text2);font-size:.9rem}
+
+/* Error */
+.error-screen{
+  padding:60px 20px;text-align:center;
+}
+.error-screen .icon{font-size:2.4rem;margin-bottom:12px}
+.error-screen h2{font-size:1.1rem;margin-bottom:8px}
+.error-screen p{color:var(--text2);font-size:.85rem;line-height:1.5;max-width:300px;margin:0 auto}
+.btn{
+  margin-top:20px;padding:12px 28px;border-radius:100px;
+  background:var(--accent);color:#0f0f0f;font-weight:600;
+  font-size:.9rem;border:none;cursor:pointer;
+  transition:transform .15s,opacity .15s;
+}
+.btn:active{transform:scale(.96);opacity:.8}
+
+/* Station list */
+.station-list{padding:0 12px 24px;display:flex;flex-direction:column;gap:8px}
+.station-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:16px;
+  cursor:pointer;transition:all .2s;
+  display:grid;grid-template-columns:1fr auto;gap:4px 12px;
+}
+.station-card:hover{border-color:var(--accent);transform:translateY(-1px);box-shadow:var(--shadow)}
+.station-card:active{transform:scale(.985)}
+.station-name{
+  font-weight:600;font-size:.95rem;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.station-address{
+  font-size:.78rem;color:var(--text2);
+  grid-column:1;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.station-price{
+  grid-row:1/3;align-self:center;
+  font-size:1.35rem;font-weight:700;
+  text-align:right;
+}
+.station-price small{font-size:.65rem;font-weight:400;color:var(--text2)}
+.price-cheap{color:var(--accent)}
+.price-mid{color:var(--warn)}
+.price-expensive{color:var(--danger)}
+.station-meta{
+  grid-column:1/-1;
+  display:flex;gap:12px;margin-top:6px;
+  font-size:.75rem;color:var(--text2);
+}
+.station-meta span{display:flex;align-items:center;gap:4px}
+.station-badge{
+  display:inline-block;padding:2px 8px;border-radius:6px;
+  font-size:.68rem;font-weight:600;
+  background:rgba(74,222,128,.12);color:var(--accent);
+}
+.nav-hint{
+  grid-column:1/-1;margin-top:4px;
+  font-size:.7rem;color:var(--accent);opacity:.6;
+  display:flex;align-items:center;gap:4px;
+}
+
+/* Empty */
+.empty{padding:60px 20px;text-align:center;color:var(--text2);font-size:.9rem}
+
+/* Footer / Coffee */
+.footer{
+  padding:32px 20px 48px;text-align:center;
+  border-top:1px solid var(--border);margin-top:16px;
+}
+.coffee-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:12px 24px;border-radius:100px;
+  background:#FFDD00;color:#000;font-weight:700;
+  font-size:.9rem;border:none;cursor:pointer;
+  transition:transform .15s,box-shadow .15s;
+  box-shadow:0 2px 12px rgba(255,221,0,.25);
+}
+.coffee-btn:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(255,221,0,.35)}
+.coffee-btn:active{transform:scale(.96)}
+.coffee-btn svg{width:20px;height:20px}
+.footer p{margin-top:12px;font-size:.72rem;color:var(--text2)}
+.footer p a{color:var(--accent)}
+
+/* Responsive */
+@media(min-width:600px){
+  body{max-width:480px;margin:0 auto;border-left:1px solid var(--border);border-right:1px solid var(--border);min-height:100dvh}
+}
+
+/* Skeleton animation for loading cards */
+.skeleton{
+  background:linear-gradient(90deg,var(--surface2) 25%,var(--border) 50%,var(--surface2) 75%);
+  background-size:200% 100%;
+  animation:shimmer 1.5s infinite;
+  border-radius:8px;
+}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16"/><path d="M13 10h4a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-4"/><path d="M7 2v4"/><path d="M10 2v4"/><path d="M3 22h10"/></svg>
+    Mu<span>Diesel</span>
+  </h1>
+  <p>Gasolineras baratas cerca de ti</p>
+</div>
+
+<div class="controls" id="controls" style="display:none">
+  <div class="control-row" id="fuelSelector">
+    <button class="pill active" data-fuel="Precio Gasoleo A">Diésel</button>
+    <button class="pill" data-fuel="Precio Gasolina 95 E5">Gasolina 95</button>
+    <button class="pill" data-fuel="Precio Gasolina 98 E5">Gasolina 98</button>
+  </div>
+  <div class="control-row">
+    <button class="pill active" data-radius="10">10 km</button>
+    <button class="pill" data-radius="5">5 km</button>
+    <button class="pill" data-radius="25">25 km</button>
+    <button class="pill" data-sort="price" id="sortPrice">Más barata</button>
+    <button class="pill" data-sort="distance" id="sortDist">Más cerca</button>
+  </div>
+</div>
+
+<div class="status" id="statusBar" style="display:none">
+  <span class="dot"></span>
+  <span id="statusText">Cargando...</span>
+</div>
+
+<div id="content">
+  <div class="loading-screen" id="loadingScreen">
+    <div class="spinner"></div>
+    <p>Obteniendo tu ubicación...</p>
+  </div>
+</div>
+
+<div class="footer" id="footer" style="display:none">
+  <a class="coffee-btn" href="https://buymeacoffee.com/mudiesel" target="_blank" rel="noopener">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+    Buy me a coffee
+  </a>
+  <p>Datos del <a href="https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/" target="_blank">Ministerio de Industria y Turismo</a> · Precios actualizados diariamente</p>
+</div>
+
+<script>
+(function(){
+  // State
+  let allStations = [];
+  let userLat = null, userLon = null;
+  let selectedFuel = 'Precio Gasoleo A';
+  let selectedRadius = 10;
+  let sortBy = 'price'; // 'price' | 'distance'
+
+  const API_URL = 'https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/';
+
+  // DOM refs
+  const content = document.getElementById('content');
+  const controls = document.getElementById('controls');
+  const statusBar = document.getElementById('statusBar');
+  const statusText = document.getElementById('statusText');
+  const footer = document.getElementById('footer');
+  const loadingScreen = document.getElementById('loadingScreen');
+
+  // Haversine distance in km
+  function haversine(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
+  // Parse Spanish decimal
+  function parsePrice(str) {
+    if (!str || str.trim() === '') return null;
+    return parseFloat(str.replace(',', '.'));
+  }
+
+  // Parse coordinates (handle comma decimals)
+  function parseCoord(str) {
+    if (!str) return null;
+    return parseFloat(str.replace(',', '.'));
+  }
+
+  // Show error screen
+  function showError(title, msg) {
+    content.innerHTML = `
+      <div class="error-screen">
+        <div class="icon">📍</div>
+        <h2>${title}</h2>
+        <p>${msg}</p>
+        <button class="btn" onclick="location.reload()">Reintentar</button>
+      </div>`;
+  }
+
+  // Get user location
+  function getLocation() {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error('Tu navegador no soporta geolocalización'));
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        pos => resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
+        err => {
+          if (err.code === 1) reject(new Error('Permiso de ubicación denegado. Actívalo en los ajustes de tu navegador.'));
+          else reject(new Error('No se pudo obtener tu ubicación. Inténtalo de nuevo.'));
+        },
+        { enableHighAccuracy: true, timeout: 15000 }
+      );
+    });
+  }
+
+  // Fetch station data
+  async function fetchStations() {
+    loadingScreen.querySelector('p').textContent = 'Descargando precios...';
+    const resp = await fetch(API_URL, {
+      headers: { 'Accept': 'application/json' }
+    });
+    if (!resp.ok) throw new Error('Error al obtener datos del Ministerio');
+    const data = await resp.json();
+    return data.ListaEESSPrecio || [];
+  }
+
+  // Process and filter stations
+  function processStations() {
+    const results = [];
+    for (const s of allStations) {
+      const price = parsePrice(s[selectedFuel]);
+      if (price === null) continue;
+
+      const lat = parseCoord(s['Latitud']);
+      const lon = parseCoord(s['Longitud (WGS84)']);
+      if (lat === null || lon === null) continue;
+
+      const dist = haversine(userLat, userLon, lat, lon);
+      if (dist > selectedRadius) continue;
+
+      results.push({
+        name: s['Rótulo'] || 'Sin nombre',
+        address: s['Dirección'] || '',
+        locality: s['Localidad'] || '',
+        province: s['Provincia'] || '',
+        schedule: s['Horario'] || '',
+        price,
+        lat,
+        lon,
+        distance: dist
+      });
+    }
+
+    if (sortBy === 'price') {
+      results.sort((a, b) => a.price - b.price || a.distance - b.distance);
+    } else {
+      results.sort((a, b) => a.distance - b.distance || a.price - b.price);
+    }
+
+    return results;
+  }
+
+  // Price tier
+  function priceTier(price, stations) {
+    if (stations.length < 3) return 'cheap';
+    const prices = stations.map(s => s.price).sort((a, b) => a - b);
+    const p33 = prices[Math.floor(prices.length * 0.33)];
+    const p66 = prices[Math.floor(prices.length * 0.66)];
+    if (price <= p33) return 'cheap';
+    if (price <= p66) return 'mid';
+    return 'expensive';
+  }
+
+  // Format distance
+  function fmtDist(km) {
+    if (km < 1) return `${Math.round(km * 1000)} m`;
+    return `${km.toFixed(1)} km`;
+  }
+
+  // Google Maps deep link
+  function mapsUrl(lat, lon) {
+    return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}&travelmode=driving`;
+  }
+
+  // Render station list
+  function render() {
+    const stations = processStations();
+
+    // Status
+    const fuelNames = {
+      'Precio Gasoleo A': 'Diésel',
+      'Precio Gasolina 95 E5': 'Gasolina 95',
+      'Precio Gasolina 98 E5': 'Gasolina 98'
+    };
+    statusText.textContent = `${stations.length} gasolineras con ${fuelNames[selectedFuel]} en ${selectedRadius} km`;
+
+    if (stations.length === 0) {
+      content.innerHTML = `<div class="empty">
+        <p>No se encontraron gasolineras con ${fuelNames[selectedFuel]} en ${selectedRadius} km.</p>
+        <p style="margin-top:8px">Prueba a ampliar el radio de búsqueda.</p>
+      </div>`;
+      return;
+    }
+
+    let html = '<div class="station-list">';
+    stations.forEach((s, i) => {
+      const tier = priceTier(s.price, stations);
+      const tierClass = tier === 'cheap' ? 'price-cheap' : tier === 'mid' ? 'price-mid' : 'price-expensive';
+      html += `
+        <a class="station-card" href="${mapsUrl(s.lat, s.lon)}" target="_blank" rel="noopener">
+          <div class="station-name">${i === 0 ? '<span class="station-badge">Mejor precio</span> ' : ''}${escHtml(s.name)}</div>
+          <div class="station-price ${tierClass}">${s.price.toFixed(3)}<small> €/L</small></div>
+          <div class="station-address">${escHtml(s.address)}, ${escHtml(s.locality)}</div>
+          <div class="station-meta">
+            <span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              ${escHtml(s.schedule)}
+            </span>
+            <span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              ${fmtDist(s.distance)}
+            </span>
+          </div>
+          <div class="nav-hint">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            Abrir en Google Maps
+          </div>
+        </a>`;
+    });
+    html += '</div>';
+    content.innerHTML = html;
+  }
+
+  function escHtml(str) {
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  // Setup controls
+  function setupControls() {
+    // Fuel selector
+    document.querySelectorAll('#fuelSelector .pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#fuelSelector .pill').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedFuel = btn.dataset.fuel;
+        render();
+      });
+    });
+
+    // Radius selector
+    document.querySelectorAll('[data-radius]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-radius]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedRadius = parseInt(btn.dataset.radius);
+        render();
+      });
+    });
+
+    // Sort selector
+    const sortPrice = document.getElementById('sortPrice');
+    const sortDist = document.getElementById('sortDist');
+    sortPrice.classList.add('active');
+    sortPrice.addEventListener('click', () => {
+      sortBy = 'price';
+      sortPrice.classList.add('active');
+      sortDist.classList.remove('active');
+      render();
+    });
+    sortDist.addEventListener('click', () => {
+      sortBy = 'distance';
+      sortDist.classList.add('active');
+      sortPrice.classList.remove('active');
+      render();
+    });
+  }
+
+  // Init
+  async function init() {
+    try {
+      const pos = await getLocation();
+      userLat = pos.lat;
+      userLon = pos.lon;
+
+      allStations = await fetchStations();
+
+      controls.style.display = '';
+      statusBar.style.display = '';
+      footer.style.display = '';
+
+      setupControls();
+      render();
+    } catch (err) {
+      showError('Error', err.message);
+    }
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
