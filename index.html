@@ -137,6 +137,7 @@ select.pill{appearance:none;padding-right:28px;
   grid-column:1/-1;
   display:flex;gap:12px;margin-top:6px;
   font-size:.75rem;color:var(--text2);
+  flex-wrap:wrap;
 }
 .station-meta span{display:flex;align-items:center;gap:4px}
 .station-badge{
@@ -144,11 +145,76 @@ select.pill{appearance:none;padding-right:28px;
   font-size:.68rem;font-weight:600;
   background:rgba(74,222,128,.12);color:var(--accent);
 }
+.badge-avg-below{
+  display:inline-block;padding:2px 8px;border-radius:6px;
+  font-size:.68rem;font-weight:600;
+  background:rgba(74,222,128,.12);color:var(--accent);
+}
+.badge-avg-above{
+  display:inline-block;padding:2px 8px;border-radius:6px;
+  font-size:.68rem;font-weight:600;
+  background:rgba(248,113,113,.12);color:var(--danger);
+}
+.freshness-fresh{color:var(--accent)}
+.freshness-stale{color:var(--warn)}
+.freshness-old{color:var(--danger)}
 .nav-hint{
   grid-column:1/-1;margin-top:4px;
   font-size:.7rem;color:var(--accent);opacity:.6;
   display:flex;align-items:center;gap:4px;
 }
+
+/* Confirm buttons */
+.confirm-row{
+  grid-column:1/-1;margin-top:6px;
+  display:flex;gap:8px;align-items:center;
+}
+.confirm-btn{
+  padding:4px 12px;border-radius:100px;
+  font-size:.7rem;font-weight:600;cursor:pointer;
+  border:1px solid var(--border);background:var(--surface2);color:var(--text2);
+  transition:all .2s;
+}
+.confirm-btn:hover{border-color:var(--accent);color:var(--text)}
+.confirm-btn.confirmed{background:rgba(74,222,128,.15);color:var(--accent);border-color:var(--accent)}
+.confirm-btn.reported{background:rgba(248,113,113,.15);color:var(--danger);border-color:var(--danger)}
+.confirm-msg{font-size:.68rem;color:var(--accent);margin-left:4px}
+.badge-confirmed{
+  display:inline-block;padding:2px 8px;border-radius:6px;
+  font-size:.68rem;font-weight:600;
+  background:rgba(74,222,128,.12);color:var(--accent);
+}
+
+/* Brand comparison view */
+.brand-list{padding:0 12px 24px;display:flex;flex-direction:column;gap:8px}
+.brand-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:16px;
+  display:grid;grid-template-columns:1fr auto;gap:4px 12px;
+  cursor:pointer;transition:all .2s;
+}
+.brand-card:hover{border-color:var(--accent);transform:translateY(-1px);box-shadow:var(--shadow)}
+.brand-card.expanded{border-color:var(--accent)}
+.brand-name{font-weight:600;font-size:.95rem}
+.brand-count{font-size:.75rem;color:var(--text2)}
+.brand-price{
+  grid-row:1/3;align-self:center;
+  font-size:1.35rem;font-weight:700;text-align:right;
+}
+.brand-price small{font-size:.65rem;font-weight:400;color:var(--text2)}
+.brand-range{
+  grid-column:1/-1;font-size:.72rem;color:var(--text2);margin-top:4px;
+}
+.brand-stations{
+  grid-column:1/-1;margin-top:8px;
+  display:flex;flex-direction:column;gap:6px;
+}
+.brand-station-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:8px 12px;background:var(--surface2);border-radius:10px;
+  font-size:.82rem;
+}
+.brand-station-row a{color:var(--accent);font-size:.72rem}
 
 /* Empty */
 .empty{padding:60px 20px;text-align:center;color:var(--text2);font-size:.9rem}
@@ -199,9 +265,9 @@ select.pill{appearance:none;padding-right:28px;
 
 <div class="controls" id="controls" style="display:none">
   <div class="control-row" id="fuelSelector">
-    <button class="pill active" data-fuel="Precio Gasoleo A">Diésel</button>
-    <button class="pill" data-fuel="Precio Gasolina 95 E5">Gasolina 95</button>
-    <button class="pill" data-fuel="Precio Gasolina 98 E5">Gasolina 98</button>
+    <button class="pill active" data-fuel="diesel">Diésel</button>
+    <button class="pill" data-fuel="g95">Gasolina 95</button>
+    <button class="pill" data-fuel="g98">Gasolina 98</button>
   </div>
   <div class="control-row">
     <button class="pill active" data-radius="10">10 km</button>
@@ -209,6 +275,8 @@ select.pill{appearance:none;padding-right:28px;
     <button class="pill" data-radius="25">25 km</button>
     <button class="pill" data-sort="price" id="sortPrice">Más barata</button>
     <button class="pill" data-sort="distance" id="sortDist">Más cerca</button>
+    <button class="pill" data-sort="value" id="sortValue">Mejor valor</button>
+    <button class="pill" data-sort="brand" id="sortBrand">Por cadena</button>
   </div>
 </div>
 
@@ -229,19 +297,45 @@ select.pill{appearance:none;padding-right:28px;
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
     Buy me a coffee
   </a>
-  <p>Datos del <a href="https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/" target="_blank">Ministerio de Industria y Turismo</a> · Precios actualizados en tiempo real cada 5 min</p>
+  <p>Datos del <a href="https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/" target="_blank">Ministerio de Industria y Turismo</a> · Precios actualizados cada hora</p>
 </div>
 
 <script>
 (function(){
+  // =============================================
+  // CONFIGURACION — Reemplazar con tus datos de Supabase
+  // =============================================
+  const SUPABASE_URL = 'https://flaxnidbbtyhjsjgfzfi.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsYXhuaWRiYnR5aGpzamdmemZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1MDQ1MDYsImV4cCI6MjA4OTA4MDUwNn0.BCpnKAiV5LuownR3GDaA0a9CsfQldPUX-wawqMHMrO4';
+
+  // Fallback: API directa del Ministerio (se usa si Supabase no esta configurado)
+  const MINISTERIO_API = 'https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/';
+  const useSupabase = !SUPABASE_URL.includes('TU_PROYECTO');
+
   // State
   let allStations = [];
   let userLat = null, userLon = null;
-  let selectedFuel = 'Precio Gasoleo A';
+  let selectedFuel = 'diesel';
   let selectedRadius = 10;
-  let sortBy = 'price'; // 'price' | 'distance'
+  let sortBy = 'price';
+  let preciosMedios = {};
+  let lastUpdate = null;
+  let dataSource = 'ministerio'; // 'supabase' | 'ministerio'
+  let confirmations = {}; // gasolinera_id -> { count, latest }
+  var COST_PER_KM = 0.08; // coste estimado por km para indice precio x distancia
 
-  const API_URL = 'https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/';
+  // Mapeo de combustibles (para modo fallback con API directa)
+  const FUEL_API_KEYS = {
+    'diesel': 'Precio Gasoleo A',
+    'g95': 'Precio Gasolina 95 E5',
+    'g98': 'Precio Gasolina 98 E5'
+  };
+
+  const FUEL_NAMES = {
+    'diesel': 'Diésel',
+    'g95': 'Gasolina 95',
+    'g98': 'Gasolina 98'
+  };
 
   // DOM refs
   const content = document.getElementById('content');
@@ -266,7 +360,6 @@ select.pill{appearance:none;padding-right:28px;
     return parseFloat(str.replace(',', '.'));
   }
 
-  // Parse coordinates (handle comma decimals)
   function parseCoord(str) {
     if (!str) return null;
     return parseFloat(str.replace(',', '.'));
@@ -276,7 +369,7 @@ select.pill{appearance:none;padding-right:28px;
   function showError(title, msg) {
     content.innerHTML = `
       <div class="error-screen">
-        <div class="icon">📍</div>
+        <div class="icon">&#x1f4cd;</div>
         <h2>${title}</h2>
         <p>${msg}</p>
         <button class="btn" onclick="location.reload()">Reintentar</button>
@@ -301,47 +394,157 @@ select.pill{appearance:none;padding-right:28px;
     });
   }
 
-  // Fetch station data
-  async function fetchStations() {
-    loadingScreen.querySelector('p').textContent = 'Descargando precios...';
-    const resp = await fetch(API_URL, {
+  // =============================================
+  // FETCH: Supabase (principal) o Ministerio (fallback)
+  // =============================================
+
+  // Headers para Supabase REST API
+  function supabaseHeaders() {
+    return {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+      'Accept': 'application/json'
+    };
+  }
+
+  // Fetch desde Supabase: usa la vista v_ultimos_precios
+  async function fetchFromSupabase() {
+    // Obtener precios del combustible seleccionado
+    const url = SUPABASE_URL + '/rest/v1/v_ultimos_precios?combustible=eq.' + selectedFuel + '&select=*';
+    const resp = await fetch(url, { headers: supabaseHeaders() });
+    if (!resp.ok) throw new Error('Error al consultar Supabase (' + resp.status + ')');
+    const data = await resp.json();
+
+    // Obtener precios medios
+    const metaUrl = SUPABASE_URL + '/rest/v1/metadatos?clave=eq.precios_medios&select=valor';
+    const metaResp = await fetch(metaUrl, { headers: supabaseHeaders() });
+    if (metaResp.ok) {
+      const metaData = await metaResp.json();
+      if (metaData.length > 0) {
+        preciosMedios = metaData[0].valor;
+      }
+    }
+
+    // Cargar confirmaciones recientes (últimas 24h)
+    var confUrl = SUPABASE_URL + '/rest/v1/confirmaciones?created_at=gte.' + new Date(Date.now() - 24*60*60*1000).toISOString() + '&select=gasolinera_id,combustible,es_correcto,created_at';
+    var confResp = await fetch(confUrl, { headers: supabaseHeaders() });
+    if (confResp.ok) {
+      var confData = await confResp.json();
+      confirmations = {};
+      for (var c = 0; c < confData.length; c++) {
+        var conf = confData[c];
+        if (conf.combustible !== selectedFuel) continue;
+        var key = conf.gasolinera_id;
+        if (!confirmations[key]) confirmations[key] = { count: 0, latest: conf.created_at };
+        if (conf.es_correcto) confirmations[key].count++;
+        if (conf.created_at > confirmations[key].latest) confirmations[key].latest = conf.created_at;
+      }
+    }
+
+    // Transformar al formato interno
+    return data.map(function(row) {
+      return {
+        id: row.gasolinera_id || '',
+        name: row.nombre || 'Sin nombre',
+        nameOriginal: row.nombre_original || '',
+        address: row.direccion || '',
+        locality: row.localidad || '',
+        province: row.provincia || '',
+        price: row.precio,
+        lat: row.lat,
+        lng: row.lng,
+        createdAt: row.created_at,
+        fechaMinisterio: row.fecha_ministerio
+      };
+    });
+  }
+
+  // Fetch desde API del Ministerio (fallback)
+  async function fetchFromMinisterio() {
+    const resp = await fetch(MINISTERIO_API, {
       headers: { 'Accept': 'application/json' }
     });
     if (!resp.ok) throw new Error('Error al obtener datos del Ministerio');
     const data = await resp.json();
-    return data.ListaEESSPrecio || [];
-  }
+    const raw = data.ListaEESSPrecio || [];
+    const fuelKey = FUEL_API_KEYS[selectedFuel];
 
-  // Process and filter stations
-  function processStations() {
-    const results = [];
-    for (const s of allStations) {
-      const price = parsePrice(s[selectedFuel]);
-      if (price === null) continue;
-
-      const lat = parseCoord(s['Latitud']);
-      const lon = parseCoord(s['Longitud (WGS84)']);
-      if (lat === null || lon === null) continue;
-
-      const dist = haversine(userLat, userLon, lat, lon);
-      if (dist > selectedRadius) continue;
-
-      results.push({
+    return raw.map(function(s) {
+      var price = parsePrice(s[fuelKey]);
+      if (price === null) return null;
+      var lat = parseCoord(s['Latitud']);
+      var lng = parseCoord(s['Longitud (WGS84)']);
+      if (lat === null || lng === null) return null;
+      return {
         name: s['Rótulo'] || 'Sin nombre',
+        nameOriginal: s['Rótulo'] || '',
         address: s['Dirección'] || '',
         locality: s['Localidad'] || '',
         province: s['Provincia'] || '',
-        price,
-        lat,
-        lon,
-        distance: dist
+        price: price,
+        lat: lat,
+        lng: lng,
+        createdAt: null,
+        fechaMinisterio: data.Fecha || null
+      };
+    }).filter(Boolean);
+  }
+
+  async function fetchStations() {
+    loadingScreen.querySelector('p').textContent = 'Descargando precios...';
+
+    if (useSupabase) {
+      try {
+        var stations = await fetchFromSupabase();
+        dataSource = 'supabase';
+        return stations;
+      } catch (e) {
+        console.warn('Supabase no disponible, usando API del Ministerio:', e.message);
+      }
+    }
+
+    // Fallback al Ministerio
+    dataSource = 'ministerio';
+    return await fetchFromMinisterio();
+  }
+
+  // =============================================
+  // PROCESS & FILTER
+  // =============================================
+
+  function processStations() {
+    var results = [];
+    for (var i = 0; i < allStations.length; i++) {
+      var s = allStations[i];
+      var dist = haversine(userLat, userLon, s.lat, s.lng);
+      if (dist > selectedRadius) continue;
+
+      results.push({
+        id: s.id,
+        name: s.name,
+        nameOriginal: s.nameOriginal,
+        address: s.address,
+        locality: s.locality,
+        province: s.province,
+        price: s.price,
+        lat: s.lat,
+        lng: s.lng,
+        distance: dist,
+        createdAt: s.createdAt,
+        fechaMinisterio: s.fechaMinisterio
       });
     }
 
     if (sortBy === 'price') {
-      results.sort((a, b) => a.price - b.price || a.distance - b.distance);
+      results.sort(function(a, b) { return a.price - b.price || a.distance - b.distance; });
+    } else if (sortBy === 'value') {
+      results.sort(function(a, b) {
+        var scoreA = a.price + (a.distance * COST_PER_KM);
+        var scoreB = b.price + (b.distance * COST_PER_KM);
+        return scoreA - scoreB;
+      });
     } else {
-      results.sort((a, b) => a.distance - b.distance || a.price - b.price);
+      results.sort(function(a, b) { return a.distance - b.distance || a.price - b.price; });
     }
 
     return results;
@@ -350,9 +553,9 @@ select.pill{appearance:none;padding-right:28px;
   // Price tier
   function priceTier(price, stations) {
     if (stations.length < 3) return 'cheap';
-    const prices = stations.map(s => s.price).sort((a, b) => a - b);
-    const p33 = prices[Math.floor(prices.length * 0.33)];
-    const p66 = prices[Math.floor(prices.length * 0.66)];
+    var prices = stations.map(function(s) { return s.price; }).sort(function(a, b) { return a - b; });
+    var p33 = prices[Math.floor(prices.length * 0.33)];
+    var p66 = prices[Math.floor(prices.length * 0.66)];
     if (price <= p33) return 'cheap';
     if (price <= p66) return 'mid';
     return 'expensive';
@@ -360,83 +563,294 @@ select.pill{appearance:none;padding-right:28px;
 
   // Format distance
   function fmtDist(km) {
-    if (km < 1) return `${Math.round(km * 1000)} m`;
-    return `${km.toFixed(1)} km`;
+    if (km < 1) return Math.round(km * 1000) + ' m';
+    return km.toFixed(1) + ' km';
+  }
+
+  // Freshness: how old is the price data?
+  function getFreshness(createdAt) {
+    if (!createdAt) return null;
+    var now = Date.now();
+    var then = new Date(createdAt).getTime();
+    var hoursAgo = (now - then) / (1000 * 60 * 60);
+
+    if (hoursAgo < 2) return { label: 'Hace ' + formatAgo(hoursAgo), cls: 'freshness-fresh' };
+    if (hoursAgo < 6) return { label: 'Hace ' + formatAgo(hoursAgo) + ' - puede no estar al dia', cls: 'freshness-stale' };
+    return { label: 'Hace ' + formatAgo(hoursAgo) + ' - posiblemente desactualizado', cls: 'freshness-old' };
+  }
+
+  function formatAgo(hours) {
+    if (hours < 1) {
+      var mins = Math.round(hours * 60);
+      return mins + ' min';
+    }
+    var h = Math.floor(hours);
+    var m = Math.round((hours - h) * 60);
+    if (m === 0) return h + 'h';
+    return h + 'h ' + m + 'min';
+  }
+
+  // Average price comparison
+  function getAvgComparison(price) {
+    var avg = preciosMedios[selectedFuel];
+    if (!avg) return null;
+    var diff = price - avg;
+    var absDiff = Math.abs(diff).toFixed(3);
+    if (Math.abs(diff) < 0.003) return null; // Negligible difference
+    if (diff < 0) {
+      return { text: absDiff + ' €/L bajo la media', cls: 'badge-avg-below' };
+    }
+    return { text: absDiff + ' €/L sobre la media', cls: 'badge-avg-above' };
   }
 
   // Google Maps deep link
-  function mapsUrl(lat, lon) {
-    return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}&travelmode=driving`;
-  }
-
-  // Render station list
-  function render() {
-    const stations = processStations();
-
-    // Status
-    const fuelNames = {
-      'Precio Gasoleo A': 'Diésel',
-      'Precio Gasolina 95 E5': 'Gasolina 95',
-      'Precio Gasolina 98 E5': 'Gasolina 98'
-    };
-    const timeStr = lastUpdate ? ` · ${formatTime(lastUpdate)}` : '';
-    statusText.textContent = `${stations.length} gasolineras con ${fuelNames[selectedFuel]} en ${selectedRadius} km${timeStr}`;
-
-    if (stations.length === 0) {
-      content.innerHTML = `<div class="empty">
-        <p>No se encontraron gasolineras con ${fuelNames[selectedFuel]} en ${selectedRadius} km.</p>
-        <p style="margin-top:8px">Prueba a ampliar el radio de búsqueda.</p>
-      </div>`;
-      return;
-    }
-
-    let html = '<div class="station-list">';
-    stations.forEach((s, i) => {
-      const tier = priceTier(s.price, stations);
-      const tierClass = tier === 'cheap' ? 'price-cheap' : tier === 'mid' ? 'price-mid' : 'price-expensive';
-      html += `
-        <a class="station-card" href="${mapsUrl(s.lat, s.lon)}" target="_blank" rel="noopener">
-          <div class="station-name">${i === 0 ? '<span class="station-badge">Mejor precio</span> ' : ''}${escHtml(s.name)}</div>
-          <div class="station-price ${tierClass}">${s.price.toFixed(3)}<small> €/L</small></div>
-          <div class="station-address">${escHtml(s.address)}, ${escHtml(s.locality)}</div>
-          <div class="station-meta">
-            <span>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              ${fmtDist(s.distance)}
-            </span>
-          </div>
-          <div class="nav-hint">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            Abrir en Google Maps
-          </div>
-        </a>`;
-    });
-    html += '</div>';
-    content.innerHTML = html;
+  function mapsUrl(lat, lng) {
+    return 'https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lng + '&travelmode=driving';
   }
 
   function escHtml(str) {
-    const d = document.createElement('div');
+    var d = document.createElement('div');
     d.textContent = str;
     return d.innerHTML;
   }
 
-  // Setup controls
+  // =============================================
+  // RENDER
+  // =============================================
+
+  // =============================================
+  // CONFIRMACIONES (crowdsourcing)
+  // =============================================
+
+  function confirmPrice(gasolineraId, esCorrect) {
+    if (!useSupabase) return;
+    var body = {
+      gasolinera_id: gasolineraId,
+      combustible: selectedFuel,
+      es_correcto: esCorrect
+    };
+    fetch(SUPABASE_URL + '/rest/v1/confirmaciones', {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(body)
+    }).then(function(resp) {
+      if (resp.ok) {
+        var btn = document.getElementById('confirm-' + gasolineraId);
+        if (btn) {
+          btn.parentElement.innerHTML = '<span class="confirm-msg">' +
+            (esCorrect ? 'Precio confirmado' : 'Reportado como incorrecto') + '</span>';
+        }
+      }
+    });
+  }
+
+  // Make confirmPrice available to onclick handlers
+  window._confirmPrice = confirmPrice;
+
+  // =============================================
+  // RENDER: Brand comparison view
+  // =============================================
+
+  function renderBrands() {
+    var stations = processStations();
+
+    var timeStr = lastUpdate ? (' \u00b7 ' + formatTime(lastUpdate)) : '';
+    statusText.textContent = 'Comparativa por cadena \u00b7 ' + FUEL_NAMES[selectedFuel] + ' en ' + selectedRadius + ' km' + timeStr;
+
+    if (stations.length === 0) {
+      content.innerHTML = '<div class="empty"><p>No se encontraron gasolineras en ' + selectedRadius + ' km.</p></div>';
+      return;
+    }
+
+    // Group by brand name
+    var brands = {};
+    for (var i = 0; i < stations.length; i++) {
+      var s = stations[i];
+      var brand = s.name;
+      if (!brands[brand]) brands[brand] = { stations: [], sum: 0 };
+      brands[brand].stations.push(s);
+      brands[brand].sum += s.price;
+    }
+
+    // Convert to sorted array
+    var brandList = [];
+    for (var name in brands) {
+      var b = brands[name];
+      var avg = b.sum / b.stations.length;
+      var prices = b.stations.map(function(s) { return s.price; }).sort(function(a, b) { return a - b; });
+      brandList.push({
+        name: name,
+        avg: avg,
+        min: prices[0],
+        max: prices[prices.length - 1],
+        count: b.stations.length,
+        stations: b.stations.sort(function(a, b) { return a.price - b.price; })
+      });
+    }
+    brandList.sort(function(a, b) { return a.avg - b.avg; });
+
+    var html = '<div class="brand-list">';
+    for (var j = 0; j < brandList.length; j++) {
+      var br = brandList[j];
+      var tier = priceTier(br.avg, brandList.map(function(x) { return { price: x.avg }; }));
+      var tierClass = tier === 'cheap' ? 'price-cheap' : tier === 'mid' ? 'price-mid' : 'price-expensive';
+      var cardId = 'brand-' + j;
+
+      var badge = '';
+      if (j === 0) badge = '<span class="station-badge">Más barata</span> ';
+
+      html += '<div class="brand-card" onclick="document.getElementById(\'' + cardId + '\').style.display=document.getElementById(\'' + cardId + '\').style.display===\'none\'?\'flex\':\'none\'">' +
+        '<div class="brand-name">' + badge + escHtml(br.name) + '</div>' +
+        '<div class="brand-price ' + tierClass + '">' + br.avg.toFixed(3) + '<small> €/L avg</small></div>' +
+        '<div class="brand-count">' + br.count + ' estacion' + (br.count > 1 ? 'es' : '') + ' cercana' + (br.count > 1 ? 's' : '') + '</div>';
+
+      if (br.count > 1) {
+        html += '<div class="brand-range">Rango: ' + br.min.toFixed(3) + ' – ' + br.max.toFixed(3) + ' €/L</div>';
+      }
+
+      html += '<div class="brand-stations" id="' + cardId + '" style="display:none">';
+      for (var k = 0; k < br.stations.length; k++) {
+        var st = br.stations[k];
+        html += '<div class="brand-station-row">' +
+          '<span>' + escHtml(st.address) + ' · ' + fmtDist(st.distance) + '</span>' +
+          '<span style="font-weight:600">' + st.price.toFixed(3) + ' €/L</span>' +
+          ' <a href="' + mapsUrl(st.lat, st.lng) + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">Ir</a>' +
+          '</div>';
+      }
+      html += '</div></div>';
+    }
+    html += '</div>';
+    content.innerHTML = html;
+  }
+
+  // =============================================
+  // RENDER: Station list (main view)
+  // =============================================
+
+  function render() {
+    if (sortBy === 'brand') {
+      renderBrands();
+      return;
+    }
+
+    var stations = processStations();
+
+    // Status bar
+    var timeStr = lastUpdate ? (' \u00b7 ' + formatTime(lastUpdate)) : '';
+    var sourceStr = dataSource === 'supabase' ? '' : ' (datos directos del Ministerio)';
+    var sortLabel = sortBy === 'value' ? ' \u00b7 ordenado por mejor valor' : '';
+    statusText.textContent = stations.length + ' gasolineras con ' + FUEL_NAMES[selectedFuel] + ' en ' + selectedRadius + ' km' + sortLabel + timeStr + sourceStr;
+
+    if (stations.length === 0) {
+      content.innerHTML = '<div class="empty">' +
+        '<p>No se encontraron gasolineras con ' + FUEL_NAMES[selectedFuel] + ' en ' + selectedRadius + ' km.</p>' +
+        '<p style="margin-top:8px">Prueba a ampliar el radio de búsqueda.</p>' +
+        '</div>';
+      return;
+    }
+
+    var html = '<div class="station-list">';
+    for (var i = 0; i < stations.length; i++) {
+      var s = stations[i];
+      var tier = priceTier(s.price, stations);
+      var tierClass = tier === 'cheap' ? 'price-cheap' : tier === 'mid' ? 'price-mid' : 'price-expensive';
+
+      // Badges
+      var badges = '';
+      if (i === 0 && sortBy === 'price') {
+        badges += '<span class="station-badge">Mejor precio</span> ';
+      }
+      if (i === 0 && sortBy === 'value') {
+        badges += '<span class="station-badge">Mejor valor</span> ';
+      }
+      var avgComp = getAvgComparison(s.price);
+      if (avgComp) {
+        badges += '<span class="' + avgComp.cls + '">' + avgComp.text + '</span> ';
+      }
+      // Confirmation badge
+      var conf = confirmations[s.id];
+      if (conf && conf.count > 0) {
+        var confAge = (Date.now() - new Date(conf.latest).getTime()) / (1000 * 60 * 60);
+        if (confAge < 4) {
+          badges += '<span class="badge-confirmed">Precio confirmado hace ' + formatAgo(confAge) + '</span> ';
+        }
+      }
+
+      // Freshness indicator
+      var freshness = getFreshness(s.createdAt);
+      var freshnessHtml = '';
+      if (freshness) {
+        freshnessHtml = '<span class="' + freshness.cls + '">' +
+          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' +
+          freshness.label + '</span>';
+      }
+
+      // Value score indicator
+      var valueHtml = '';
+      if (sortBy === 'value') {
+        var score = s.price + (s.distance * COST_PER_KM);
+        valueHtml = '<span style="color:var(--accent)">' +
+          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>' +
+          'Coste real: ' + score.toFixed(3) + ' €/L</span>';
+      }
+
+      // Confirm buttons (only if Supabase is active and station has an id)
+      var confirmHtml = '';
+      if (useSupabase && s.id) {
+        confirmHtml = '<div class="confirm-row">' +
+          '<button class="confirm-btn" id="confirm-' + s.id + '" onclick="event.preventDefault();event.stopPropagation();window._confirmPrice(\'' + s.id + '\',true)">Confirmar precio</button>' +
+          '<button class="confirm-btn" onclick="event.preventDefault();event.stopPropagation();window._confirmPrice(\'' + s.id + '\',false)">Precio incorrecto</button>' +
+          '</div>';
+      }
+
+      html += '<a class="station-card" href="' + mapsUrl(s.lat, s.lng) + '" target="_blank" rel="noopener">' +
+        '<div class="station-name">' + badges + escHtml(s.name) + '</div>' +
+        '<div class="station-price ' + tierClass + '">' + s.price.toFixed(3) + '<small> €/L</small></div>' +
+        '<div class="station-address">' + escHtml(s.address) + ', ' + escHtml(s.locality) + '</div>' +
+        '<div class="station-meta">' +
+          '<span>' +
+            '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' +
+            fmtDist(s.distance) +
+          '</span>' +
+          freshnessHtml +
+          valueHtml +
+        '</div>' +
+        confirmHtml +
+        '<div class="nav-hint">' +
+          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>' +
+          'Abrir en Google Maps' +
+        '</div>' +
+      '</a>';
+    }
+    html += '</div>';
+    content.innerHTML = html;
+  }
+
+  // =============================================
+  // CONTROLS
+  // =============================================
+
   function setupControls() {
     // Fuel selector
-    document.querySelectorAll('#fuelSelector .pill').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('#fuelSelector .pill').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('#fuelSelector .pill').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('#fuelSelector .pill').forEach(function(b) { b.classList.remove('active'); });
         btn.classList.add('active');
         selectedFuel = btn.dataset.fuel;
-        render();
+        // Re-fetch when fuel changes (Supabase filters by fuel server-side)
+        refreshData();
       });
     });
 
     // Radius selector
-    document.querySelectorAll('[data-radius]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('[data-radius]').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('[data-radius]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('[data-radius]').forEach(function(b) { b.classList.remove('active'); });
         btn.classList.add('active');
         selectedRadius = parseInt(btn.dataset.radius);
         render();
@@ -444,27 +858,34 @@ select.pill{appearance:none;padding-right:28px;
     });
 
     // Sort selector
-    const sortPrice = document.getElementById('sortPrice');
-    const sortDist = document.getElementById('sortDist');
-    sortPrice.classList.add('active');
-    sortPrice.addEventListener('click', () => {
-      sortBy = 'price';
-      sortPrice.classList.add('active');
-      sortDist.classList.remove('active');
+    var sortBtns = {
+      price: document.getElementById('sortPrice'),
+      distance: document.getElementById('sortDist'),
+      value: document.getElementById('sortValue'),
+      brand: document.getElementById('sortBrand')
+    };
+    sortBtns.price.classList.add('active');
+
+    function setSort(key) {
+      sortBy = key;
+      for (var k in sortBtns) {
+        sortBtns[k].classList.toggle('active', k === key);
+      }
       render();
-    });
-    sortDist.addEventListener('click', () => {
-      sortBy = 'distance';
-      sortDist.classList.add('active');
-      sortPrice.classList.remove('active');
-      render();
-    });
+    }
+
+    sortBtns.price.addEventListener('click', function() { setSort('price'); });
+    sortBtns.distance.addEventListener('click', function() { setSort('distance'); });
+    sortBtns.value.addEventListener('click', function() { setSort('value'); });
+    sortBtns.brand.addEventListener('click', function() { setSort('brand'); });
   }
 
-  // Auto-refresh interval (5 min)
-  const REFRESH_INTERVAL = 5 * 60 * 1000;
-  let refreshTimer = null;
-  let lastUpdate = null;
+  // =============================================
+  // REFRESH & INIT
+  // =============================================
+
+  var REFRESH_INTERVAL = 5 * 60 * 1000;
+  var refreshTimer = null;
 
   async function refreshData() {
     try {
@@ -478,10 +899,9 @@ select.pill{appearance:none;padding-right:28px;
     return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
   }
 
-  // Init
   async function init() {
     try {
-      const pos = await getLocation();
+      var pos = await getLocation();
       userLat = pos.lat;
       userLon = pos.lon;
 
@@ -499,7 +919,7 @@ select.pill{appearance:none;padding-right:28px;
       refreshTimer = setInterval(refreshData, REFRESH_INTERVAL);
 
       // Refresh on tab focus
-      document.addEventListener('visibilitychange', () => {
+      document.addEventListener('visibilitychange', function() {
         if (!document.hidden && lastUpdate && (Date.now() - lastUpdate.getTime() > REFRESH_INTERVAL)) {
           refreshData();
         }

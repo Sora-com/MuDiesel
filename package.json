@@ -1,0 +1,23 @@
+{
+  "name": "mudiesel",
+  "version": "1.0.0",
+  "description": "Encuentra las gasolineras más baratas cerca de ti en España.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sora-com/MuDiesel.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Sora-com/MuDiesel/issues"
+  },
+  "homepage": "https://github.com/Sora-com/MuDiesel#readme",
+  "dependencies": {
+    "supabase": "^2.78.1"
+  }
+}
