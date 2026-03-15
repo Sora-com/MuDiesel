@@ -407,15 +407,21 @@ select.pill{appearance:none;padding-right:28px;
     };
   }
 
-  // Fetch desde Supabase: usa la vista v_ultimos_precios
+  // Fetch desde Supabase: usa la vista v_ultimos_precios (paginado)
   async function fetchFromSupabase() {
-    // Obtener precios del combustible seleccionado (sin limite de filas)
-    const url = SUPABASE_URL + '/rest/v1/v_ultimos_precios?combustible=eq.' + selectedFuel + '&select=*';
-    var hdrs = supabaseHeaders();
-    hdrs['Range'] = '0-49999';
-    const resp = await fetch(url, { headers: hdrs });
-    if (!resp.ok) throw new Error('Error al consultar Supabase (' + resp.status + ')');
-    const data = await resp.json();
+    var allData = [];
+    var pageSize = 1000;
+    var from = 0;
+    while (true) {
+      var url = SUPABASE_URL + '/rest/v1/v_ultimos_precios?combustible=eq.' + selectedFuel + '&select=*&order=gasolinera_id&offset=' + from + '&limit=' + pageSize;
+      var resp = await fetch(url, { headers: supabaseHeaders() });
+      if (!resp.ok) throw new Error('Error al consultar Supabase (' + resp.status + ')');
+      var page = await resp.json();
+      allData = allData.concat(page);
+      if (page.length < pageSize) break;
+      from += pageSize;
+    }
+    var data = allData;
 
     // Obtener precios medios
     const metaUrl = SUPABASE_URL + '/rest/v1/metadatos?clave=eq.precios_medios&select=valor';
