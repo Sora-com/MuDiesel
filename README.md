@@ -39,23 +39,6 @@ Fuente primaria: [API REST del Ministerio de Industria y Turismo](https://sedeap
 
 Un GitHub Action consulta la API cada hora, normaliza los nombres de marca y guarda los precios en Supabase (PostgreSQL). El frontend consulta Supabase con fallback directo a la API del Ministerio si Supabase no esta disponible.
 
-## Configuracion
-
-### Requisitos
-
-- Cuenta en [Supabase](https://supabase.com) (tier gratuito)
-- Repositorio en GitHub (para GitHub Actions)
-
-### Pasos
-
-1. Crear proyecto en Supabase
-2. Ejecutar `supabase/schema.sql` en el SQL Editor de Supabase
-3. Habilitar extensiones `pg_cron` y `pg_net` en Database > Extensions
-4. Anadir secretos en GitHub repo Settings > Secrets > Actions:
-   - `SUPABASE_URL` — URL del proyecto (ej: `https://xxxxx.supabase.co`)
-   - `SUPABASE_SERVICE_ROLE_KEY` — clave service_role (Settings > API)
-5. Actualizar `SUPABASE_URL` y `SUPABASE_ANON_KEY` en `index.html`
-6. Push a GitHub — el Action se ejecutara automaticamente cada hora
 
 ## Licencia
 
