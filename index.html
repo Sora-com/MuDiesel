@@ -409,9 +409,11 @@ select.pill{appearance:none;padding-right:28px;
 
   // Fetch desde Supabase: usa la vista v_ultimos_precios
   async function fetchFromSupabase() {
-    // Obtener precios del combustible seleccionado
+    // Obtener precios del combustible seleccionado (sin limite de filas)
     const url = SUPABASE_URL + '/rest/v1/v_ultimos_precios?combustible=eq.' + selectedFuel + '&select=*';
-    const resp = await fetch(url, { headers: supabaseHeaders() });
+    var hdrs = supabaseHeaders();
+    hdrs['Range'] = '0-49999';
+    const resp = await fetch(url, { headers: hdrs });
     if (!resp.ok) throw new Error('Error al consultar Supabase (' + resp.status + ')');
     const data = await resp.json();
 
